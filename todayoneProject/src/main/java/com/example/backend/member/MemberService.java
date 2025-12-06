@@ -1,6 +1,7 @@
 package com.example.backend.member;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -35,7 +36,7 @@ public class MemberService {
 	}
 	
 	//생성(회원가입)
-	public MemberResponseDto createMember(MemberRequestDto.SignupRequest memberRequestDto) {
+	public MemberResponseDto memberCreate(MemberRequestDto.SignupRequest memberRequestDto) {
 		if(memberRepository.findByUserid(memberRequestDto.getUserid()).isPresent()) {
 			throw new IllegalStateException("이미 사용 중인 아이디입니다.");
 		}
@@ -55,7 +56,7 @@ public class MemberService {
 	}
 	
 	//로그인
-	public MemberResponseDto MemberLogin(String userid, String password) {
+	public MemberResponseDto memberLogin(String userid, String password) {
 		Member member = memberRepository.findByUserid(userid)
 				.orElseThrow(() -> new IllegalArgumentException("가입 된 아이디가 없습니다."));
 		
@@ -66,19 +67,26 @@ public class MemberService {
 	}
 	
 	//수정
-	public MemberResponseDto MemberModify(Integer userno, MemberRequestDto.modifyRequest memberRequestDto) {
+	public MemberResponseDto memberModify(Integer userno, MemberRequestDto.ModifyRequest memberRequestDto) {
 		Member member = memberRepository.findById(userno)
 				.orElseThrow(() -> new IllegalArgumentException("가입된 회원이 아닙니다."));
 		
+		Optional<Member> checkUsername = memberRepository.findByUsername(memberRequestDto.getUsername());
+		if(checkUsername.isPresent() && !checkUsername.get().getUserno().equals(userno)) {
+			throw new IllegalStateException("이미 사용 중인 닉네임입니다.");
+		}
+		
 		member.setUsername(memberRequestDto.getUsername());
-		member.setPassword(passwordEncoder.encode(memberRequestDto.getPassword()));
+		if(memberRequestDto.getPassword() != null && !memberRequestDto.getPassword().isEmpty()) {
+		    member.setPassword(passwordEncoder.encode(memberRequestDto.getPassword()));
+		} //비밀번호는 선택 비워두면 기존 비밀번호 사용 (
 		member.setBirth(memberRequestDto.getBirth());
 		
 		return toResponseDto(member);
 	}
 	
 	//삭제
-	public void MemberDelete(Integer userno) {
+	public void memberDelete(Integer userno) {
 		memberRepository.deleteById(userno);
 	}
 }

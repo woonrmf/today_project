@@ -31,7 +31,7 @@ public class MemberRequestDto {
 	
 	@Getter
 	@Setter
-	public static class modifyRequest {
+	public static class ModifyRequest {
 		private String username;
 		private String password;
 		private String birth;

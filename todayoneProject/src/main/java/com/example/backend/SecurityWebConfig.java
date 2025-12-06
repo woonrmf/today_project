@@ -10,6 +10,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityWebConfig {
@@ -22,10 +24,19 @@ public class SecurityWebConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http.csrf(csrf -> csrf.disable()) // 개발 단계에서 CSRF 비활성화
-				.cors(cors -> {
-				}) // cors 허용
-				.headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()) // H2 console iframe 허용
-				).authorizeHttpRequests(auth -> auth.requestMatchers("/h2-console/**").permitAll() // H2 console 접근 허용
+				.cors(cors -> {}) // cors 허용
+				.logout(logout -> logout
+						.logoutUrl("/api/logout")
+						.logoutSuccessHandler((request, response, authentication) -> {
+							response.setStatus(HttpServletResponse.SC_OK);
+							response.setContentType("application/json");
+							response.getWriter().write("{\"message\":\"로그아웃 완료\"}");
+						})
+						.deleteCookies("JSESSIONID")
+						.invalidateHttpSession(true)
+				)
+				.authorizeHttpRequests(auth -> auth
+						.requestMatchers("/api/**").permitAll()
 						.anyRequest().permitAll() // 나머지 API 전부 허용
 				);
 
