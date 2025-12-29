@@ -1,5 +1,7 @@
 package com.example.backend.member;
 
+import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -12,4 +14,5 @@ public class MemberResponseDto {
 	private String userid;
 	private String birth;
 	private Role role;
+	private LocalDateTime credate;
 }

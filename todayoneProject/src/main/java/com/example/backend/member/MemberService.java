@@ -1,5 +1,6 @@
 package com.example.backend.member;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,7 +20,7 @@ public class MemberService {
 	
 	//엔티티는 db고 dto는 응답 쪽으로 분리, 보안 문제 등으로 엔티티를 dto로 변환 메서드
 	private MemberResponseDto toResponseDto(Member member) {
-		return new MemberResponseDto(member.getUserno(), member.getUsername(), member.getUserid(), member.getBirth(), member.getRole());
+		return new MemberResponseDto(member.getUserno(), member.getUsername(), member.getUserid(), member.getBirth(), member.getRole(), member.getCredate());
 	}
 	
 	//전체 리스트
@@ -29,9 +30,13 @@ public class MemberService {
 	}
 	
 	//상세 조회
-	public MemberResponseDto getMemberDetail(Integer userno) {
+	public MemberResponseDto getMemberDetail(Integer userno, Principal principal) {
 		Member member = memberRepository.findById(userno)
 				.orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+		
+		if(!member.getUserid().equals(principal.getName())) {
+			throw new IllegalStateException("조회 권한이 없습니다.");
+		}
 		return toResponseDto(member);
 	}
 	
@@ -55,25 +60,21 @@ public class MemberService {
 		return toResponseDto(member);
 	}
 	
-	//로그인
-	public MemberResponseDto memberLogin(String userid, String password) {
-		Member member = memberRepository.findByUserid(userid)
-				.orElseThrow(() -> new IllegalArgumentException("가입 된 아이디가 없습니다."));
-		
-		if(!passwordEncoder.matches(password, member.getPassword())) {
-			throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-		}
-		return toResponseDto(member);
-	}
-	
 	//수정
-	public MemberResponseDto memberModify(Integer userno, MemberRequestDto.ModifyRequest memberRequestDto) {
+	public MemberResponseDto memberModify(Integer userno, MemberRequestDto.ModifyRequest memberRequestDto, Principal principal) {
+		Member loginMember = memberRepository.findByUserid(principal.getName())
+	            .orElseThrow(() -> new IllegalArgumentException("로그인 정보를 찾을 수 없습니다."));
+		
 		Member member = memberRepository.findById(userno)
 				.orElseThrow(() -> new IllegalArgumentException("가입된 회원이 아닙니다."));
 		
 		Optional<Member> checkUsername = memberRepository.findByUsername(memberRequestDto.getUsername());
 		if(checkUsername.isPresent() && !checkUsername.get().getUserno().equals(userno)) {
 			throw new IllegalStateException("이미 사용 중인 닉네임입니다.");
+		}
+		
+		if(!loginMember.getUserno().equals(userno) && !loginMember.getRole().equals(Role.ADMIN)) {
+			throw new IllegalStateException("수정 권한이 없습니다.");
 		}
 		
 		member.setUsername(memberRequestDto.getUsername());
@@ -86,7 +87,17 @@ public class MemberService {
 	}
 	
 	//삭제
-	public void memberDelete(Integer userno) {
+	public void memberDelete(Integer userno, Principal principal) {
+		Member loginMember = memberRepository.findByUserid(principal.getName())
+	            .orElseThrow(() -> new IllegalArgumentException("로그인 정보를 찾을 수 없습니다."));
+		
+		Member member = memberRepository.findById(userno)
+				.orElseThrow(() -> new IllegalArgumentException("가입된 회원이 아닙니다."));
+		
+		if(!loginMember.getUserno().equals(userno) && !loginMember.getRole().equals(Role.ADMIN)) {
+			throw new IllegalArgumentException("삭제 권한이 없습니다.");
+		}
+		
 		memberRepository.deleteById(userno);
 	}
 }

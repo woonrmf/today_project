@@ -1,9 +1,11 @@
 package com.example.backend.member;
 
+import java.security.Principal;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,15 +25,16 @@ public class MemberController {
 	
 	private final MemberService memberService;
 	
-	@GetMapping
+	@PreAuthorize("hasRole('ADMIN')")
+	@GetMapping("/list")
 	public ResponseEntity<List<MemberResponseDto>> getMemberList() {
 		List<MemberResponseDto> memberList = memberService.getMemberList();
 		return ResponseEntity.ok(memberList);
 	}
 	
 	@GetMapping("/{userno}")
-	public ResponseEntity<MemberResponseDto> getMemberDetail(@PathVariable("userno") Integer userno) {
-		MemberResponseDto memberDetail = memberService.getMemberDetail(userno);
+	public ResponseEntity<MemberResponseDto> getMemberDetail(@PathVariable("userno") Integer userno, Principal principal) {
+		MemberResponseDto memberDetail = memberService.getMemberDetail(userno, principal);
 		return ResponseEntity.ok(memberDetail);
 	}
 	
@@ -45,21 +48,15 @@ public class MemberController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(memberCreate);
 	}
 	
-	@PostMapping("/login")
-	public ResponseEntity<MemberResponseDto> login(@RequestBody @Valid MemberRequestDto.LoginRequest loginRequest) {
-		MemberResponseDto memberLogin = memberService.memberLogin(loginRequest.getUserid(), loginRequest.getPassword());
-		return ResponseEntity.ok(memberLogin);
-	}
-	
 	@PutMapping("/{userno}")
-	public ResponseEntity<MemberResponseDto> modify(@PathVariable("userno") Integer userno, @RequestBody @Valid MemberRequestDto.ModifyRequest modifyRequest) {
-	    MemberResponseDto memberModify = memberService.memberModify(userno, modifyRequest);
+	public ResponseEntity<MemberResponseDto> modify(@PathVariable("userno") Integer userno, @RequestBody @Valid MemberRequestDto.ModifyRequest modifyRequest, Principal principal) {
+	    MemberResponseDto memberModify = memberService.memberModify(userno, modifyRequest, principal);
 	    return ResponseEntity.ok(memberModify);
 	}
 	
 	@DeleteMapping("/{userno}")
-	public ResponseEntity<Void> delete(@PathVariable("userno") Integer userno) {
-		memberService.memberDelete(userno);
+	public ResponseEntity<Void> delete(@PathVariable("userno") Integer userno, Principal principal) {
+		memberService.memberDelete(userno, principal);
 		return ResponseEntity.noContent().build();
 	}
 }

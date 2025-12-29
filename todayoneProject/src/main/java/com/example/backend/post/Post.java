@@ -9,6 +9,8 @@ import com.example.backend.member.Member;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -34,7 +36,8 @@ public class Post extends BaseTime {
 	@Column(length = 300, nullable = false)
 	private String content;
 	
-	private Integer status = 1; //공개 1, 비공개 0 기본값 = 공개
+	@Enumerated(EnumType.STRING)
+	private Role status; //공개 1, 비공개 0 기본값 = 공개
 	
 	@ManyToOne
 	private Member member;

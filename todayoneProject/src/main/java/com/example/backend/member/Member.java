@@ -7,6 +7,7 @@ import com.example.backend.feedback.Feedback;
 import com.example.backend.likes.Likes;
 import com.example.backend.notice.Notice;
 import com.example.backend.post.Post;
+import com.example.backend.word.Word;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -55,5 +56,8 @@ public class Member extends BaseTime {
 	
 	@OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE)
 	private List<Likes> likesList;
+	
+	@OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE)
+	private List<Word> wordList;
 	
 }
