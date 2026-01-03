@@ -3,6 +3,7 @@ package com.example.backend.feedback;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.backend.member.Member;
 import com.example.backend.member.MemberRepository;
@@ -10,6 +11,7 @@ import com.example.backend.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class FeedbackService {
 

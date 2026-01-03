@@ -10,13 +10,18 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
-@Table(name = "likes")
+@Table(
+		name = "likes",
+		uniqueConstraints = {
+				@UniqueConstraint(columnNames = {"member_memberno", "post_postno"})
+		})
 public class Likes extends BaseTime {
 	
 	@Id
