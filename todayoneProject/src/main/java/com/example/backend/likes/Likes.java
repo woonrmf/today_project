@@ -21,7 +21,7 @@ import lombok.Setter;
 		name = "likes",
 		uniqueConstraints = {
 				@UniqueConstraint(columnNames = {"member_memberno", "post_postno"})
-		})
+		}) //db 유니크 제약 (중복 클릭 시 중복 저장 방지)
 public class Likes extends BaseTime {
 	
 	@Id
