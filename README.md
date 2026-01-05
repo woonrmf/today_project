@@ -71,7 +71,7 @@
   <img src="images/mainpage2.png" width="700" />
 </p>
 <p align="left">
-  <img src="images/mainpage3.png" width="700" />
+  <img src="images/mainpage3.jpg" width="700" />
 </p>
 
 ### 2) 글 작성 페이지
